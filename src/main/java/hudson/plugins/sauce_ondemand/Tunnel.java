@@ -27,6 +27,7 @@ import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -42,11 +43,13 @@ import java.io.Serializable;
 public class Tunnel extends AbstractDescribableImpl<Tunnel> implements Serializable {
     public final int localPort;
     public final String localHost;
+    public final String startingURL;
 
     @DataBoundConstructor
-    public Tunnel(int localPort, String localHost) {
+    public Tunnel(int localPort, String localHost, String startingURL) {
         this.localHost = localHost;
         this.localPort = localPort;
+        this.startingURL = startingURL;
     }
 
     @Extension
@@ -56,7 +59,13 @@ public class Tunnel extends AbstractDescribableImpl<Tunnel> implements Serializa
         }
 
         public FormValidation doCheckLocalPort(@QueryParameter String remotePort) {
-            return FormValidation.validatePositiveInteger(remotePort);
+            if (StringUtils.isBlank(remotePort)) {
+                return FormValidation.ok();
+            }
+            else {
+               return FormValidation.validatePositiveInteger(remotePort);
+            }
+
         }
     }
 

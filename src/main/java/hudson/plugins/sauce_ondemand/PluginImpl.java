@@ -25,9 +25,9 @@ package hudson.plugins.sauce_ondemand;
 
 import com.saucelabs.ci.SauceLibraryManager;
 import com.saucelabs.hudson.HudsonSauceLibraryManager;
+import com.saucelabs.hudson.HudsonSauceManagerFactory;
 import com.saucelabs.rest.Credential;
 import com.saucelabs.rest.SauceTunnelFactory;
-import com.saucelabs.sauceconnect.SauceConnect;
 import hudson.Extension;
 import hudson.Plugin;
 import hudson.model.Describable;
@@ -43,9 +43,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Persists the access credential to Sauce OnDemand.
@@ -66,6 +64,10 @@ public class PluginImpl extends Plugin implements Describable<PluginImpl> {
      * Password for Sauce OnDemand.
      */
     private Secret apiKey;
+    
+    private boolean reuseSauceAuth;
+    
+    private String sauceConnectDirectory;
 
     public String getUsername() {
         return username;
@@ -84,6 +86,7 @@ public class PluginImpl extends Plugin implements Describable<PluginImpl> {
         Items.XSTREAM.alias("hudson.plugins.sauce_ondemand.SauceOnDemandBuildWrapper", SauceOnDemandBuildWrapper.class);
 
         load();
+        HudsonSauceManagerFactory.getInstance().start();
     }
 
     public void setCredential(String username, String apiKey) throws IOException {
@@ -94,8 +97,10 @@ public class PluginImpl extends Plugin implements Describable<PluginImpl> {
 
     @Override
     public void configure(StaplerRequest req, JSONObject formData) throws IOException, ServletException, Descriptor.FormException {
+        reuseSauceAuth = formData.getBoolean("reuseSauceAuth");
         username = formData.getString("username");
         apiKey = Secret.fromString(formData.getString("apiKey"));
+        sauceConnectDirectory = formData.getString("sauceConnectDirectory");
         save();
     }
 
@@ -107,6 +112,18 @@ public class PluginImpl extends Plugin implements Describable<PluginImpl> {
         return Hudson.getInstance().getPlugin(PluginImpl.class);
     }
 
+    public boolean isReuseSauceAuth() {
+        return reuseSauceAuth;
+    }
+
+    public String getSauceConnectDirectory() {
+        return sauceConnectDirectory;
+    }
+
+    public void setSauceConnectDirectory(String sauceConnectDirectory) {
+        this.sauceConnectDirectory = sauceConnectDirectory;
+    }
+
     @Extension
     public static final class DescriptorImpl extends Descriptor<PluginImpl> {
         @Override
@@ -114,15 +131,12 @@ public class PluginImpl extends Plugin implements Describable<PluginImpl> {
             return "Sauce OnDemand";
         }
 
-        public FormValidation doValidate(@QueryParameter String username, @QueryParameter String apiKey) {
+        public FormValidation doValidate(@QueryParameter String username, @QueryParameter String apiKey, @QueryParameter boolean reuseSauceAuth ) {
             try {
-                new File
-                        (SauceConnect.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-                new SauceTunnelFactory(new Credential(username, Secret.toString(Secret.fromString(apiKey)))).list();
+                Credential credential = reuseSauceAuth ? new Credential() : new Credential(username, Secret.toString(Secret.fromString(apiKey)));
+                new SauceTunnelFactory(credential).list();
                 return FormValidation.ok("Success");
             } catch (IOException e) {
-                return FormValidation.error(e, "Failed to connect to Sauce OnDemand");
-            } catch (URISyntaxException e) {
                 return FormValidation.error(e, "Failed to connect to Sauce OnDemand");
             }
         }

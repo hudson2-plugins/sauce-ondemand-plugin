@@ -26,8 +26,9 @@ package hudson.plugins.sauce_ondemand;
 import com.saucelabs.rest.Credential;
 import hudson.plugins.sauce_ondemand.PluginImpl.DescriptorImpl;
 import hudson.util.FormValidation.Kind;
-import hudson.util.Secret;
 import org.jvnet.hudson.test.HudsonTestCase;
+
+import java.io.File;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -45,14 +46,26 @@ public class PluginImplTest extends HudsonTestCase {
 //        assertEquals("bar", Secret.toString(p.getApiKey()));
 //    }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+		File sauceSettings = new File(new File(System.getProperty("user.home")),".sauce-ondemand");
+		if (!sauceSettings.exists()) {
+			String userName = System.getProperty("sauce.user");
+			String accessKey = System.getProperty("access.key");
+			Credential credential = new Credential(userName, accessKey);
+			credential.saveTo(sauceSettings);
+		}
+	}
+
     public void testValidation() throws Exception {
         DescriptorImpl d = PluginImpl.get().getDescriptor();
 
         // this should fail
-        assertEquals(Kind.ERROR, d.doValidate("bogus","bogus").kind);
+        assertEquals(Kind.ERROR, d.doValidate("bogus","bogus", false).kind);
 
         // this should work
         Credential c = new Credential();
-        assertEquals(Kind.OK, d.doValidate(c.getUsername(),c.getKey()).kind);
+        assertEquals(Kind.OK, d.doValidate(c.getUsername(),c.getKey(), false).kind);
     }
 }

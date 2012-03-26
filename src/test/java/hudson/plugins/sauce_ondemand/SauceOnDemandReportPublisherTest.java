@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
 public class SauceOnDemandReportPublisherTest extends BaseTezt {
 
     public void testReportEmbedding() throws Exception {
-        //testReportEmbedding(IOUtils.toString(getClass().getResourceAsStream("test-result.xml")), false);
+        testReportEmbedding(IOUtils.toString(getClass().getResourceAsStream("test-result.xml")), false);
     }
 
     public void testReportEmbeddingOld() throws Exception {
@@ -56,7 +56,8 @@ public class SauceOnDemandReportPublisherTest extends BaseTezt {
     private void testReportEmbedding(String testReport, boolean oldStyle) throws Exception {
         setCredential();
         FreeStyleProject p = createFreeStyleProject();
-        SauceOnDemandBuildWrapper before = new SauceOnDemandBuildWrapper(new Tunnel(jettyLocalPort, "localhost"));
+
+        SauceOnDemandBuildWrapper before = new SauceOnDemandBuildWrapper(null, new SeleniumInformation("http://localhost:8080/"), "localhost", "4445", true, null);
         p.getBuildWrappersList().add(before);
         JUnitResultArchiver junit = new JUnitResultArchiver(
                 "test.xml",
@@ -97,7 +98,7 @@ public class SauceOnDemandReportPublisherTest extends BaseTezt {
             com.saucelabs.rest.Job job = factory.get(sessionId);
             assertEquals(TeztSimulation.JOB_NAME, job.name);
             assertTrue(job.passed);
-            assertEquals(1, job.build);
+            assertEquals("1", job.build);
         }
     }
 
