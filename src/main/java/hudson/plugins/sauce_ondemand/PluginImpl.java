@@ -40,7 +40,6 @@ import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -146,7 +145,7 @@ public class PluginImpl extends Plugin implements Describable<PluginImpl> {
      * 
      * @return
      */
-    @JavaScriptMethod
+    //@JavaScriptMethod
     public String checkForUpdates() {
         try {
             boolean updateAvailable = libraryManager.checkForLaterVersion();
@@ -169,7 +168,7 @@ public class PluginImpl extends Plugin implements Describable<PluginImpl> {
      * 
      * @return
      */
-    @JavaScriptMethod
+    //@JavaScriptMethod
     public String applyUpdates() {
         try {
             libraryManager.triggerReload();
