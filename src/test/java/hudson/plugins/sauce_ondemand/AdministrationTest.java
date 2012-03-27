@@ -1,8 +1,10 @@
 package hudson.plugins.sauce_ondemand;
 
-public class AdministrationTest extends BaseTezt {
-	
-	public void testSauceFields() throws Exception {
+import junit.framework.TestCase;
+
+public class AdministrationTest extends TestCase {
+
+	public void sauceFields() throws Exception {
 //		Selenium s = SeleniumFactory.create("http://localhost/");
 //        s.start();
 //        s.open("/");
@@ -10,7 +12,10 @@ public class AdministrationTest extends BaseTezt {
 //        s.stop();
 	}
 	
-	public void testUpdateSauceConnect() throws Exception {
+	public void updateSauceConnect() throws Exception {
 		
 	}
+    
+    public void testBlank() throws Exception {}
+    
 }
