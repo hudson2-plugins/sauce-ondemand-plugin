@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.jvnet.hudson.plugins</groupId>
 	<artifactId>sauce-ondemand</artifactId>
-	<version>1.14</version>
+	<version>1.15-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 	<name>Hudson Sauce OnDemand plugin</name>
 	<properties>
